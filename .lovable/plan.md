@@ -1,96 +1,64 @@
 
-# Drywall Pro — Plano Final
+# Ajuste de regras de aberturas
 
-App PWA mobile-first em tema escuro minimalista para cálculo profissional de drywall, com nome **Drywall Pro**.
+Refinar as fórmulas de aberturas conforme correção do usuário, mantendo o restante do plano anterior (tela Configurações + preço por perfil).
 
-## Recomendações para minimizar erros (novas adições)
+## Nova regra de aberturas
 
-Para reduzir falhas e aumentar confiabilidade em obra, incluo estas melhorias além do escopo original:
+**Porta** (e vão livre):
+- +1 montante extra (não +2)
+- Guia da verga: comprimento = `largura` da abertura → `⌈largura / 3⌉` peças de 3m
 
-### 1. Validação rigorosa de entrada
-- Validação Zod em todos os campos (nunca aceitar valores ≤ 0, NaN, ou strings vazias)
-- Limites máximos sensatos (ex: comprimento ≤ 100m, altura ≤ 15m) para evitar erro de digitação
-- Aviso visual quando uma abertura for maior que a parede (impossível fisicamente)
-- Bloqueio de salvar item incompleto
+**Janela**:
+- +1 montante extra
+- Guia da verga + peitoril: comprimento total = `largura × 2` → `⌈(largura × 2) / 3⌉` peças de 3m
+- Exemplo: janela 1,5m × 1,2m → verga 1,5m + peitoril 1,5m = 3m → **1 guia de 3m**
 
-### 2. Testes automatizados das fórmulas
-- Suíte de testes unitários (Vitest) para **todas** as fórmulas de cálculo (placas, montantes, guias, forro, parafusos, fita, massa)
-- Casos de teste com valores conhecidos do brief (erro máximo 5%) — garante que refatorações futuras não quebrem cálculos
-- Testes de borda: altura exatamente 3m, parede 100% aberturas, forro com queda zero
+## Mudanças em `src/lib/calc.ts`
 
-### 3. Funcionamento offline confiável
-- Service Worker com cache da aplicação (essencial para obra sem sinal)
-- Persistência local (IndexedDB) que sincroniza com o Cloud quando a conexão volta
-- Indicador visual de status online/offline no topo
-- Fila de sincronização para orçamentos criados offline
+- Adicionar `tipo: "porta" | "janela" | "vao"` em `Opening` (default `"porta"` para compatibilidade).
+- `montantesParede`: `+1` por abertura (em vez de `+2`).
+- `guiasExtraAberturas`:
+  - porta/vão: `⌈largura / 3⌉`
+  - janela: `⌈(largura × 2) / 3⌉`
+- Remover o `+1` fixo que existia hoje na fórmula.
 
-### 4. Prevenção de perda de dados
-- Auto-save do orçamento em rascunho a cada alteração (localStorage)
-- Recuperação automática ao reabrir o app se houve fechamento inesperado
-- Confirmação antes de excluir item ou orçamento
-- Histórico mantém versões — duplicar antes de editar um orçamento antigo
+## Mudanças em `src/components/ItemCard.tsx`
 
-### 5. Feedback e transparência de cálculo
-- Cada item mostra **memória de cálculo expansível** (área bruta, descontos, área líquida) — permite o usuário conferir
-- Aba Materiais mostra fórmula resumida ao tocar no item (ex: "Placas: ⌈(120m² × 2)/2,16⌉ × 1,07 = 119")
-- Banner de aviso quando perda > 15% ou margem < 0% (provável erro)
+- Adicionar seletor de tipo (Porta / Janela / Vão) em cada linha de abertura, com 3 botões pequenos.
+- Defaults ao adicionar:
+  - Porta: 0,8 × 2,1
+  - Janela: 1,5 × 1,2
+  - Vão: 0,9 × 2,1
+- Memória de cálculo do item passa a mostrar quantos montantes/guias extras cada abertura gerou.
 
-### 6. Segurança e isolamento
-- RLS estrita por user_id em todas as tabelas
-- Storage do logo com path `{user_id}/logo.png` e policy de acesso próprio
-- Política HIBP ativa (bloqueia senhas vazadas no cadastro)
-- Validação server-side via Edge Function ao salvar orçamento (evita manipulação)
+## Atualização de testes (`src/lib/calc.test.ts`)
 
-### 7. UX para obra (mãos sujas, sol forte)
-- Botões mínimos 56px de altura, espaçamento generoso
-- Inputs com `inputMode="decimal"` (teclado numérico nativo)
-- Vibração háptica leve ao adicionar item (confirmação tátil)
-- Modo "tela sempre acesa" durante uso ativo (Wake Lock API)
-- Alto contraste WCAG AAA no tema escuro
+- Reescrever os testes existentes que assumiam `+2` montantes e `⌈largura×2/3⌉+1` guias.
+- Adicionar casos:
+  - Janela 1,5×1,2 → 1 montante extra, 1 guia
+  - Porta 0,9×2,1 → 1 montante extra, 1 guia
+  - 2 portas → 2 montantes extras, 2 guias
+  - Janela 4,0 × 1,2 → 1 montante extra, ⌈8/3⌉ = 3 guias
 
-### 8. PDF robusto
-- Geração client-side (jsPDF + html2canvas) — funciona offline
-- Preview do PDF antes de compartilhar
-- Nome do arquivo: `Orcamento_{Cliente}_{Data}.pdf`
-- Compartilhamento via Web Share API nativa (WhatsApp, Email, Drive)
-- Fallback para download direto se Share API indisponível
+## Tela Configurações + preço por perfil (mantido do plano anterior)
 
-### 9. Backup e portabilidade
-- Exportar/importar configurações em JSON (preços, perfis, empresa) — facilita usar em novo aparelho
-- Histórico de orçamentos exportável em CSV
+- Nova rota `src/routes/configuracoes.tsx`: dados da conta, dados da empresa, upload de logo, botão Sair.
+- Em `src/routes/opcoes.tsx`: remover seção empresa e botão sair.
+- `src/routes/__root.tsx`: bottom nav passa a ter 5 abas (Início, Materiais, Orçamento, Opções, Configurações).
+- Migration: adicionar `preco_montante_48/70/90` e `preco_guia_48/70/90` em `calc_settings`.
+- `src/hooks/useSettings.ts`: incluir os 6 novos campos.
+- `src/lib/calc.ts`: helpers `montantePrecoFor(perfil_mm, settings)` e `guiaPrecoFor(perfil_mm, settings)`.
+- `src/routes/materiais.tsx`: usar os helpers conforme `perfil_mm` ativo.
+- `src/routes/opcoes.tsx`: substituir os 2 inputs únicos por uma grade 3×2 (montante 48/70/90 e guia 48/70/90), com destaque no perfil ativo.
 
-### 10. Versionamento de configurações
-- Cada orçamento salva snapshot das configurações usadas (preços, perda, espaçamento)
-- Reabrir orçamento antigo mostra os valores **da época**, não os atuais — evita recálculo silencioso
+## Arquivos tocados
 
----
+- **Criar**: `src/routes/configuracoes.tsx`
+- **Editar**: `src/lib/calc.ts`, `src/lib/calc.test.ts`, `src/components/ItemCard.tsx`, `src/routes/opcoes.tsx`, `src/routes/materiais.tsx`, `src/routes/__root.tsx`, `src/hooks/useSettings.ts`
+- **Migration**: 1 nova (6 colunas em `calc_settings`)
 
-## Escopo confirmado
+## Compatibilidade
 
-**Plataforma:** PWA mobile-first instalável  
-**Visual:** Escuro minimalista (fundo quase preto, acento amarelo/laranja para CTAs, tipografia grande)  
-**Auth:** Cadastro aberto (nome, email, senha) + HIBP ativo  
-**Recursos:** Upload de logo, histórico de orçamentos, compartilhar PDF via WhatsApp, nome do cliente no orçamento  
-**Escopo:** Implementação completa de uma vez
-
-## Estrutura de telas
-- **Início**: logo + altura fixa + comprimento + cliente/obra + 3 botões grandes (Parede/Contraparede/Forro) + lista de itens com memória de cálculo
-- **Materiais**: tabela Nome · Quantidade · Preço · Total (tempo real)
-- **Orçamento**: materiais + mão de obra + margem + valor final + Gerar PDF + Compartilhar WhatsApp + Histórico
-- **Opções**: perfil (48/70/90), placas, fita exclusiva (papel/tela), espaçamento, perda%, preços, mão de obra/m², dados da empresa + logo
-
-## Cálculos implementados (exatos do brief)
-Áreas, placas (×2 paredes, ×1 contraparede/forro, ÷2,16, +perda), montantes (com extra altura>3m e +2/abertura), guias (lineares + extras), forro (perímetro, F530, reguladores, arame kg), parafusos (×30, múltiplo de 500), buchas (max 100 vs guias×5), massa (÷23), fita exclusiva (papel 150m **ou** tela 90m). Todos com `Math.ceil` e bloqueio de negativos.
-
-## Backend (Lovable Cloud)
-Tabelas com RLS por `user_id`:
-- `profiles` (nome, email)
-- `company_settings` (nome, telefone, email, observações, logo_url)
-- `calc_settings` (perfis, preços, parâmetros, mão de obra)
-- `quotes` (cliente, obra, data, snapshot_settings, total)
-- `quote_items` (FK quote, tipo, dimensões)
-- `openings` (FK quote_item, largura, altura)
-- Bucket `logos` (path `{user_id}/logo.{ext}`)
-
-## Stack técnico
-TanStack Start + React 19 + Tailwind v4 + shadcn/ui + Zod + react-hook-form + Vitest + jsPDF + Lovable Cloud (Supabase) + IndexedDB (idb) + Service Worker (Workbox)
+- Aberturas existentes em rascunhos sem campo `tipo` são tratadas como `"porta"`.
+- Colunas antigas `preco_montante` / `preco_guia` permanecem no banco (deprecated, não usadas na UI).
