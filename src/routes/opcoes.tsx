@@ -174,6 +174,7 @@ function Opcoes() {
           <Field label="Massa (balde)"><NumInput value={Number(settings.preco_massa)} onChange={(n) => updateCalc({ preco_massa: n })} suffix="R$" /></Field>
           <Field label="Fita (rolo)"><NumInput value={Number(settings.preco_fita)} onChange={(n) => updateCalc({ preco_fita: n })} suffix="R$" /></Field>
           <Field label="Tabica"><NumInput value={Number(settings.preco_tabica)} onChange={(n) => updateCalc({ preco_tabica: n })} suffix="R$" /></Field>
+          <Field label="Cantoneira"><NumInput value={Number(settings.preco_cantoneira)} onChange={(n) => updateCalc({ preco_cantoneira: n })} suffix="R$" /></Field>
           <Field label="F530"><NumInput value={Number(settings.preco_f530)} onChange={(n) => updateCalc({ preco_f530: n })} suffix="R$" /></Field>
           <Field label="Regulador"><NumInput value={Number(settings.preco_regulador)} onChange={(n) => updateCalc({ preco_regulador: n })} suffix="R$" /></Field>
           <Field label="Arame (kg)"><NumInput value={Number(settings.preco_arame)} onChange={(n) => updateCalc({ preco_arame: n })} suffix="R$" /></Field>

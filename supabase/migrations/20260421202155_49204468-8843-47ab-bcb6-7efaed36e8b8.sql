@@ -1,0 +1,1 @@
+ALTER TABLE public.calc_settings ADD COLUMN IF NOT EXISTS preco_cantoneira numeric NOT NULL DEFAULT 12;

@@ -192,6 +192,7 @@ function OpeningsList({ item, onUpdate }: { item: WallItem; onUpdate: (a: Openin
 }
 
 function CeilingEditor({ item, onUpdate }: { item: CeilingItem; onUpdate: (p: Partial<Item>) => void }) {
+  const acab = item.acabamento ?? "tabica";
   return (
     <div className="mt-3 space-y-3">
       <div className="grid grid-cols-2 gap-2">
@@ -212,6 +213,27 @@ function CeilingEditor({ item, onUpdate }: { item: CeilingItem; onUpdate: (p: Pa
           <NumInput value={item.altura_forro || ""} onChange={(n) => onUpdate({ altura_forro: n })} max={15} />
         </div>
       </div>
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Acabamento do perímetro</label>
+        <div className="grid grid-cols-2 gap-2">
+          {([
+            { v: "tabica", l: "Tabica" },
+            { v: "cantoneira", l: "Cantoneira" },
+          ] as const).map((o) => (
+            <button
+              key={o.v}
+              onClick={() => onUpdate({ acabamento: o.v } as Partial<Item>)}
+              className={`touch-target rounded-xl border-2 text-sm font-bold ${
+                acab === o.v
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-surface text-foreground"
+              }`}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -221,11 +243,13 @@ function CalcMemory({ item }: { item: Item }) {
     const c = item as CeilingItem;
     const area = ceilingArea(c);
     const queda = Math.max(0, c.altura_laje - c.altura_forro);
+    const acab = c.acabamento ?? "tabica";
     return (
       <div className="mt-2 space-y-1 rounded-lg bg-surface/50 p-3 text-xs text-muted-foreground">
         <div>Área = {fmt(c.comprimento)} × {fmt(c.largura)} = <b className="text-foreground">{fmt(area)} m²</b></div>
         <div>Queda = {fmt(c.altura_laje)} − {fmt(c.altura_forro)} = <b className="text-foreground">{fmt(queda)} m</b></div>
         <div>Perímetro = {fmt(2 * (c.comprimento + c.largura))} m</div>
+        <div>Acabamento = <b className="text-foreground capitalize">{acab}</b></div>
       </div>
     );
   }

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { FileDown, Share2, Save, History, Trash2, Copy } from "lucide-react";
+import { FileDown, Share2, Save, History, Trash2, Copy, FilePlus2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGuard } from "@/components/AuthGuard";
 import { useDraft } from "@/hooks/useDraft";
@@ -75,6 +75,7 @@ function Orcamento() {
       fita: Number(settings.preco_fita),
       bucha: Number(settings.preco_bucha),
       tabica: Number(settings.preco_tabica),
+      cantoneira: Number(settings.preco_cantoneira),
       f530: Number(settings.preco_f530),
       regulador: Number(settings.preco_regulador),
       arame: Number(settings.preco_arame),
@@ -167,8 +168,18 @@ function Orcamento() {
       toast.error("Erro ao salvar: " + error.message);
       return;
     }
-    toast.success("Orçamento salvo!");
+    toast.success("Orçamento salvo. Pronto para o próximo!");
+    draft.reset();
+    setMargemPct(Number(settings.margem_pct));
     loadHistory();
+  };
+
+  const novoOrcamento = () => {
+    const hasContent = draft.items.length > 0 || draft.cliente || draft.obra;
+    if (hasContent && !confirm("Limpar o rascunho atual e iniciar um novo orçamento?")) return;
+    draft.reset();
+    setMargemPct(Number(settings.margem_pct));
+    toast.success("Novo orçamento iniciado");
   };
 
   const loadQuote = (q: Quote) => {
@@ -191,14 +202,22 @@ function Orcamento() {
 
   return (
     <div className="px-4 pt-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between gap-2">
         <h1 className="text-2xl font-black text-foreground">Orçamento</h1>
-        <button
-          onClick={() => setShowHistory(true)}
-          className="flex items-center gap-1 rounded-lg bg-surface px-3 py-2 text-sm font-semibold text-foreground"
-        >
-          <History className="h-4 w-4" /> Histórico
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={novoOrcamento}
+            className="flex items-center gap-1 rounded-lg bg-primary/15 px-3 py-2 text-sm font-semibold text-primary"
+          >
+            <FilePlus2 className="h-4 w-4" /> Novo
+          </button>
+          <button
+            onClick={() => setShowHistory(true)}
+            className="flex items-center gap-1 rounded-lg bg-surface px-3 py-2 text-sm font-semibold text-foreground"
+          >
+            <History className="h-4 w-4" /> Histórico
+          </button>
+        </div>
       </div>
 
       <div className="space-y-3">

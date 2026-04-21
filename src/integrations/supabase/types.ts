@@ -35,6 +35,7 @@ export type Database = {
           placa_tipo: string
           preco_arame: number
           preco_bucha: number
+          preco_cantoneira: number
           preco_f530: number
           preco_fita: number
           preco_guia: number
@@ -72,6 +73,7 @@ export type Database = {
           placa_tipo?: string
           preco_arame?: number
           preco_bucha?: number
+          preco_cantoneira?: number
           preco_f530?: number
           preco_fita?: number
           preco_guia?: number
@@ -109,6 +111,7 @@ export type Database = {
           placa_tipo?: string
           preco_arame?: number
           preco_bucha?: number
+          preco_cantoneira?: number
           preco_f530?: number
           preco_fita?: number
           preco_guia?: number

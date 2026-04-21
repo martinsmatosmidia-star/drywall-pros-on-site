@@ -29,6 +29,7 @@ export type CalcSettings = {
   preco_fita: number;
   preco_bucha: number;
   preco_tabica: number;
+  preco_cantoneira: number;
   preco_f530: number;
   preco_regulador: number;
   preco_arame: number;
