@@ -1,64 +1,55 @@
 
-# Ajuste de regras de aberturas
+# Ajustes — Cantoneira no forro + reset ao salvar/novo orçamento
 
-Refinar as fórmulas de aberturas conforme correção do usuário, mantendo o restante do plano anterior (tela Configurações + preço por perfil).
+## 1. Cantoneira como alternativa à tabica (forro)
 
-## Nova regra de aberturas
+Hoje o forro usa sempre **tabica** no perímetro. Vou adicionar **cantoneira** como opção por item de forro, com preço próprio.
 
-**Porta** (e vão livre):
-- +1 montante extra (não +2)
-- Guia da verga: comprimento = `largura` da abertura → `⌈largura / 3⌉` peças de 3m
+### Banco
+Migration adicionando à `calc_settings`:
+- `preco_cantoneira` (numeric, default `12`)
 
-**Janela**:
-- +1 montante extra
-- Guia da verga + peitoril: comprimento total = `largura × 2` → `⌈(largura × 2) / 3⌉` peças de 3m
-- Exemplo: janela 1,5m × 1,2m → verga 1,5m + peitoril 1,5m = 3m → **1 guia de 3m**
+### `src/lib/calc.ts`
+- Adicionar campo `acabamento: "tabica" | "cantoneira"` no item de forro (default `"tabica"` para compatibilidade com rascunhos antigos).
+- Em `computeTotals` / `buildMateriais`, somar perímetro de forro separadamente conforme acabamento:
+  - `perimetro_tabica` (m) → barras de tabica de 3m com perda
+  - `perimetro_cantoneira` (m) → barras de cantoneira de 3m com perda
+- A linha de materiais passa a mostrar **Tabica** e/ou **Cantoneira** (apenas as usadas).
 
-## Mudanças em `src/lib/calc.ts`
+### `src/components/ItemCard.tsx`
+- Em itens de forro, adicionar um seletor com 2 botões: **Tabica** / **Cantoneira**.
+- Memória de cálculo mostra o acabamento escolhido e quantas barras gerou.
 
-- Adicionar `tipo: "porta" | "janela" | "vao"` em `Opening` (default `"porta"` para compatibilidade).
-- `montantesParede`: `+1` por abertura (em vez de `+2`).
-- `guiasExtraAberturas`:
-  - porta/vão: `⌈largura / 3⌉`
-  - janela: `⌈(largura × 2) / 3⌉`
-- Remover o `+1` fixo que existia hoje na fórmula.
+### `src/routes/opcoes.tsx`
+- Na seção "Preços de materiais", renomear "Tabica" e adicionar campo "Cantoneira" ao lado, com preço editável.
 
-## Mudanças em `src/components/ItemCard.tsx`
+### `src/hooks/useSettings.ts`
+- Incluir `preco_cantoneira` no tipo `CalcSettings`.
 
-- Adicionar seletor de tipo (Porta / Janela / Vão) em cada linha de abertura, com 3 botões pequenos.
-- Defaults ao adicionar:
-  - Porta: 0,8 × 2,1
-  - Janela: 1,5 × 1,2
-  - Vão: 0,9 × 2,1
-- Memória de cálculo do item passa a mostrar quantos montantes/guias extras cada abertura gerou.
+### Testes (`src/lib/calc.test.ts`)
+- Caso forro com tabica → conta tabica, cantoneira = 0.
+- Caso forro com cantoneira → conta cantoneira, tabica = 0.
+- Caso 2 forros, um de cada → soma cada um no respectivo material.
 
-## Atualização de testes (`src/lib/calc.test.ts`)
+## 2. Reset automático ao salvar + botão "Novo orçamento"
 
-- Reescrever os testes existentes que assumiam `+2` montantes e `⌈largura×2/3⌉+1` guias.
-- Adicionar casos:
-  - Janela 1,5×1,2 → 1 montante extra, 1 guia
-  - Porta 0,9×2,1 → 1 montante extra, 1 guia
-  - 2 portas → 2 montantes extras, 2 guias
-  - Janela 4,0 × 1,2 → 1 montante extra, ⌈8/3⌉ = 3 guias
+### `src/hooks/useDraft.ts`
+- Já existe `reset()`. Sem mudanças.
 
-## Tela Configurações + preço por perfil (mantido do plano anterior)
+### `src/routes/orcamento.tsx`
+- Após `saveQuote()` bem-sucedido: chamar `draft.reset()` e mostrar toast "Orçamento salvo. Pronto para o próximo!".
+- Adicionar botão **Novo orçamento** no topo da tela (ao lado de "Histórico"), que pede confirmação antes de limpar caso haja itens no rascunho.
 
-- Nova rota `src/routes/configuracoes.tsx`: dados da conta, dados da empresa, upload de logo, botão Sair.
-- Em `src/routes/opcoes.tsx`: remover seção empresa e botão sair.
-- `src/routes/__root.tsx`: bottom nav passa a ter 5 abas (Início, Materiais, Orçamento, Opções, Configurações).
-- Migration: adicionar `preco_montante_48/70/90` e `preco_guia_48/70/90` em `calc_settings`.
-- `src/hooks/useSettings.ts`: incluir os 6 novos campos.
-- `src/lib/calc.ts`: helpers `montantePrecoFor(perfil_mm, settings)` e `guiaPrecoFor(perfil_mm, settings)`.
-- `src/routes/materiais.tsx`: usar os helpers conforme `perfil_mm` ativo.
-- `src/routes/opcoes.tsx`: substituir os 2 inputs únicos por uma grade 3×2 (montante 48/70/90 e guia 48/70/90), com destaque no perfil ativo.
+### `src/routes/index.tsx`
+- Adicionar botão **Novo orçamento** no topo da tela inicial, com mesma confirmação.
+- Botão fica visível só quando há itens ou cliente preenchido (evita poluir tela vazia).
 
 ## Arquivos tocados
 
-- **Criar**: `src/routes/configuracoes.tsx`
-- **Editar**: `src/lib/calc.ts`, `src/lib/calc.test.ts`, `src/components/ItemCard.tsx`, `src/routes/opcoes.tsx`, `src/routes/materiais.tsx`, `src/routes/__root.tsx`, `src/hooks/useSettings.ts`
-- **Migration**: 1 nova (6 colunas em `calc_settings`)
+- **Migration**: 1 nova (coluna `preco_cantoneira` em `calc_settings`)
+- **Editar**: `src/lib/calc.ts`, `src/lib/calc.test.ts`, `src/components/ItemCard.tsx`, `src/routes/opcoes.tsx`, `src/routes/orcamento.tsx`, `src/routes/index.tsx`, `src/hooks/useSettings.ts`
 
 ## Compatibilidade
 
-- Aberturas existentes em rascunhos sem campo `tipo` são tratadas como `"porta"`.
-- Colunas antigas `preco_montante` / `preco_guia` permanecem no banco (deprecated, não usadas na UI).
+- Itens de forro antigos sem `acabamento` são tratados como `"tabica"`.
+- Coluna `preco_tabica` permanece intacta.
