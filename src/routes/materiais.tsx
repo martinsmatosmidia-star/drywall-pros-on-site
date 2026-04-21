@@ -38,6 +38,7 @@ function Materiais() {
       fita: Number(settings.preco_fita),
       bucha: Number(settings.preco_bucha),
       tabica: Number(settings.preco_tabica),
+      cantoneira: Number(settings.preco_cantoneira),
       f530: Number(settings.preco_f530),
       regulador: Number(settings.preco_regulador),
       arame: Number(settings.preco_arame),
