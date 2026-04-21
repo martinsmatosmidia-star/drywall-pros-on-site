@@ -20,6 +20,7 @@ export type WallItem = {
   altura: number;
   aberturas: Opening[];
 };
+export type CeilingAcabamento = "tabica" | "cantoneira";
 export type CeilingItem = {
   id: string;
   tipo: "forro";
@@ -27,6 +28,7 @@ export type CeilingItem = {
   largura: number;
   altura_laje: number;
   altura_forro: number;
+  acabamento?: CeilingAcabamento;
 };
 export type Item = WallItem | CeilingItem;
 
@@ -87,7 +89,15 @@ export function guiasExtraAberturas(w: WallItem): number {
 export function forroPerimetro(c: CeilingItem) {
   return safe(c.comprimento) * 2 + safe(c.largura) * 2;
 }
+export function ceilingAcabamento(c: CeilingItem): CeilingAcabamento {
+  return c.acabamento ?? "tabica";
+}
 export function forroTabica(c: CeilingItem) {
+  if (ceilingAcabamento(c) !== "tabica") return 0;
+  return Math.ceil(forroPerimetro(c) / 3);
+}
+export function forroCantoneira(c: CeilingItem) {
+  if (ceilingAcabamento(c) !== "cantoneira") return 0;
   return Math.ceil(forroPerimetro(c) / 3);
 }
 export function forroF530(c: CeilingItem, espacamento: number): number {
@@ -125,6 +135,7 @@ export type Totals = {
   massa_baldes: number;
   fita_rolos: number;
   forro_tabica: number;
+  forro_cantoneira: number;
   forro_f530: number;
   forro_reguladores: number;
   forro_arame_kg: number;
@@ -182,6 +193,7 @@ export function computeTotals(items: Item[], p: CalcParams): Totals {
 
   // Forro
   const forro_tabica = ceilings.reduce((a, c) => a + forroTabica(c), 0);
+  const forro_cantoneira = ceilings.reduce((a, c) => a + forroCantoneira(c), 0);
   const forro_f530 = ceilings.reduce((a, c) => a + forroF530(c, p.espacamento), 0);
   const forro_reguladores = ceilings.reduce(
     (a, c) => a + forroReguladores(c, p.espacamento),
@@ -207,6 +219,7 @@ export function computeTotals(items: Item[], p: CalcParams): Totals {
     massa_baldes,
     fita_rolos,
     forro_tabica,
+    forro_cantoneira,
     forro_f530,
     forro_reguladores,
     forro_arame_kg,
@@ -231,6 +244,7 @@ export type PriceTable = {
   fita: number;
   bucha: number;
   tabica: number;
+  cantoneira: number;
   f530: number;
   regulador: number;
   arame: number;
@@ -251,8 +265,13 @@ export function buildMateriais(
     { nome: `Fita ${fita_tipo === "tela" ? "tela (90m)" : "papel (150m)"}`, quantidade: totals.fita_rolos, unidade: "rolo", preco: prices.fita, total: totals.fita_rolos * prices.fita },
   ];
   if (totals.area_forro > 0) {
+    if (totals.forro_tabica > 0) {
+      lines.push({ nome: "Tabica (3m)", quantidade: totals.forro_tabica, unidade: "un", preco: prices.tabica, total: totals.forro_tabica * prices.tabica });
+    }
+    if (totals.forro_cantoneira > 0) {
+      lines.push({ nome: "Cantoneira (3m)", quantidade: totals.forro_cantoneira, unidade: "un", preco: prices.cantoneira, total: totals.forro_cantoneira * prices.cantoneira });
+    }
     lines.push(
-      { nome: "Tabica/Cantoneira (3m)", quantidade: totals.forro_tabica, unidade: "un", preco: prices.tabica, total: totals.forro_tabica * prices.tabica },
       { nome: "Perfil F530 (3m)", quantidade: totals.forro_f530, unidade: "un", preco: prices.f530, total: totals.forro_f530 * prices.f530 },
       { nome: "Reguladores", quantidade: totals.forro_reguladores, unidade: "un", preco: prices.regulador, total: totals.forro_reguladores * prices.regulador },
       { nome: "Arame galvanizado", quantidade: totals.forro_arame_kg, unidade: "kg", preco: prices.arame, total: totals.forro_arame_kg * prices.arame }
