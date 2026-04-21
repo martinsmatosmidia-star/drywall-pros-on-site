@@ -168,6 +168,44 @@ describe("Cálculos de forro", () => {
   });
 });
 
+describe("Acabamento do forro (tabica vs cantoneira)", () => {
+  const baseCeil = {
+    id: "1",
+    tipo: "forro" as const,
+    comprimento: 5,
+    largura: 4,
+    altura_laje: 2.8,
+    altura_forro: 2.6,
+  };
+  it("forro com tabica conta tabica e zera cantoneira", () => {
+    const t = computeTotals([{ ...baseCeil, acabamento: "tabica" as const }], params);
+    // perímetro = 18m → ceil(18/3) = 6
+    expect(t.forro_tabica).toBe(6);
+    expect(t.forro_cantoneira).toBe(0);
+  });
+  it("forro com cantoneira conta cantoneira e zera tabica", () => {
+    const t = computeTotals([{ ...baseCeil, acabamento: "cantoneira" as const }], params);
+    expect(t.forro_cantoneira).toBe(6);
+    expect(t.forro_tabica).toBe(0);
+  });
+  it("forro sem acabamento é tratado como tabica", () => {
+    const t = computeTotals([baseCeil], params);
+    expect(t.forro_tabica).toBe(6);
+    expect(t.forro_cantoneira).toBe(0);
+  });
+  it("dois forros, um de cada acabamento, somam separado", () => {
+    const t = computeTotals(
+      [
+        { ...baseCeil, id: "a", acabamento: "tabica" as const },
+        { ...baseCeil, id: "b", acabamento: "cantoneira" as const },
+      ],
+      params
+    );
+    expect(t.forro_tabica).toBe(6);
+    expect(t.forro_cantoneira).toBe(6);
+  });
+});
+
 describe("Totais agregados", () => {
   const items: Item[] = [
     { id: "p1", tipo: "parede", comprimento: 5, altura: 3, aberturas: [] },
