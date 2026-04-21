@@ -6,7 +6,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { useDraft } from "@/hooks/useDraft";
 import { useCalcSettings, useCompanySettings } from "@/hooks/useSettings";
 import { useAuth } from "@/hooks/useAuth";
-import { computeTotals, buildMateriais, placaPrecoFor, type Item } from "@/lib/calc";
+import { computeTotals, buildMateriais, placaPrecoFor, montantePrecoFor, guiaPrecoFor, type Item } from "@/lib/calc";
 import { generateQuotePDF, pdfFileName } from "@/lib/pdf";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -68,8 +68,8 @@ function Orcamento() {
     totals,
     {
       placa: placaPrecoFor(settings.placa_tipo, settings),
-      montante: Number(settings.preco_montante),
-      guia: Number(settings.preco_guia),
+      montante: montantePrecoFor(Number(settings.perfil_mm), settings),
+      guia: guiaPrecoFor(Number(settings.perfil_mm), settings),
       parafuso: Number(settings.preco_parafuso),
       massa: Number(settings.preco_massa),
       fita: Number(settings.preco_fita),
