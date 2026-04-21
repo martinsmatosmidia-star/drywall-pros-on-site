@@ -18,6 +18,12 @@ export type CalcSettings = {
   massa_m2_balde: number;
   preco_montante: number;
   preco_guia: number;
+  preco_montante_48: number;
+  preco_montante_70: number;
+  preco_montante_90: number;
+  preco_guia_48: number;
+  preco_guia_70: number;
+  preco_guia_90: number;
   preco_parafuso: number;
   preco_massa: number;
   preco_fita: number;

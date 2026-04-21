@@ -13,6 +13,7 @@ import { Route as OrcamentoRouteImport } from './routes/orcamento'
 import { Route as OpcoesRouteImport } from './routes/opcoes'
 import { Route as MateriaisRouteImport } from './routes/materiais'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -36,6 +37,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CadastroRoute = CadastroRouteImport.update({
   id: '/cadastro',
   path: '/cadastro',
@@ -50,6 +56,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/login': typeof LoginRoute
   '/materiais': typeof MateriaisRoute
   '/opcoes': typeof OpcoesRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/login': typeof LoginRoute
   '/materiais': typeof MateriaisRoute
   '/opcoes': typeof OpcoesRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/login': typeof LoginRoute
   '/materiais': typeof MateriaisRoute
   '/opcoes': typeof OpcoesRoute
@@ -77,16 +86,25 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cadastro'
+    | '/configuracoes'
     | '/login'
     | '/materiais'
     | '/opcoes'
     | '/orcamento'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cadastro' | '/login' | '/materiais' | '/opcoes' | '/orcamento'
+  to:
+    | '/'
+    | '/cadastro'
+    | '/configuracoes'
+    | '/login'
+    | '/materiais'
+    | '/opcoes'
+    | '/orcamento'
   id:
     | '__root__'
     | '/'
     | '/cadastro'
+    | '/configuracoes'
     | '/login'
     | '/materiais'
     | '/opcoes'
@@ -96,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CadastroRoute: typeof CadastroRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
   LoginRoute: typeof LoginRoute
   MateriaisRoute: typeof MateriaisRoute
   OpcoesRoute: typeof OpcoesRoute
@@ -132,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cadastro': {
       id: '/cadastro'
       path: '/cadastro'
@@ -152,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CadastroRoute: CadastroRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
   LoginRoute: LoginRoute,
   MateriaisRoute: MateriaisRoute,
   OpcoesRoute: OpcoesRoute,

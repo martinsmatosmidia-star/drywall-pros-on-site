@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AuthGuard } from "@/components/AuthGuard";
 import { useDraft } from "@/hooks/useDraft";
 import { useCalcSettings } from "@/hooks/useSettings";
-import { computeTotals, buildMateriais, placaPrecoFor } from "@/lib/calc";
+import { computeTotals, buildMateriais, placaPrecoFor, montantePrecoFor, guiaPrecoFor } from "@/lib/calc";
 
 export const Route = createFileRoute("/materiais")({
   component: () => (<AuthGuard><Materiais /></AuthGuard>),
@@ -31,8 +31,8 @@ function Materiais() {
     totals,
     {
       placa: placaPrecoFor(settings.placa_tipo, settings),
-      montante: Number(settings.preco_montante),
-      guia: Number(settings.preco_guia),
+      montante: montantePrecoFor(Number(settings.perfil_mm), settings),
+      guia: guiaPrecoFor(Number(settings.perfil_mm), settings),
       parafuso: Number(settings.preco_parafuso),
       massa: Number(settings.preco_massa),
       fita: Number(settings.preco_fita),

@@ -1,5 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useLocation } from "@tanstack/react-router";
-import { Calculator, Package, Receipt, Settings } from "lucide-react";
+import { Calculator, Package, Receipt, Settings, UserCog } from "lucide-react";
 import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 
@@ -60,6 +60,7 @@ function BottomNav() {
     { to: "/materiais", label: "Materiais", icon: Package },
     { to: "/orcamento", label: "Orçamento", icon: Receipt },
     { to: "/opcoes", label: "Opções", icon: Settings },
+    { to: "/configuracoes", label: "Conta", icon: UserCog },
   ] as const;
 
   // Hide nav on auth screens
@@ -74,11 +75,11 @@ function BottomNav() {
             <Link
               key={to}
               to={to}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs font-medium transition-colors ${
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Icon className={`h-6 w-6 ${active ? "stroke-[2.5]" : ""}`} />
+              <Icon className={`h-5 w-5 ${active ? "stroke-[2.5]" : ""}`} />
               <span>{label}</span>
             </Link>
           );

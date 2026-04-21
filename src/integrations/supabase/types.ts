@@ -38,8 +38,14 @@ export type Database = {
           preco_f530: number
           preco_fita: number
           preco_guia: number
+          preco_guia_48: number
+          preco_guia_70: number
+          preco_guia_90: number
           preco_massa: number
           preco_montante: number
+          preco_montante_48: number
+          preco_montante_70: number
+          preco_montante_90: number
           preco_parafuso: number
           preco_regulador: number
           preco_tabica: number
@@ -69,8 +75,14 @@ export type Database = {
           preco_f530?: number
           preco_fita?: number
           preco_guia?: number
+          preco_guia_48?: number
+          preco_guia_70?: number
+          preco_guia_90?: number
           preco_massa?: number
           preco_montante?: number
+          preco_montante_48?: number
+          preco_montante_70?: number
+          preco_montante_90?: number
           preco_parafuso?: number
           preco_regulador?: number
           preco_tabica?: number
@@ -100,8 +112,14 @@ export type Database = {
           preco_f530?: number
           preco_fita?: number
           preco_guia?: number
+          preco_guia_48?: number
+          preco_guia_70?: number
+          preco_guia_90?: number
           preco_massa?: number
           preco_montante?: number
+          preco_montante_48?: number
+          preco_montante_70?: number
+          preco_montante_90?: number
           preco_parafuso?: number
           preco_regulador?: number
           preco_tabica?: number

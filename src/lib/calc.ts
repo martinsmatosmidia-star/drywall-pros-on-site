@@ -11,7 +11,8 @@ export const MASSA_M2_BALDE_DEFAULT = 23;
 export const ESPACAMENTO_DEFAULT = 0.6;
 export const PERDA_DEFAULT = 0.07;
 
-export type Opening = { largura: number; altura: number };
+export type OpeningTipo = "porta" | "janela" | "vao";
+export type Opening = { largura: number; altura: number; tipo?: OpeningTipo };
 export type WallItem = {
   id: string;
   tipo: "parede" | "contraparede";
@@ -64,17 +65,21 @@ export function montantesParede(w: WallItem, espacamento: number): number {
     const extra = (base * (h - 3 + 0.3)) / 3;
     total = base + Math.ceil(extra);
   }
-  // +2 por abertura
-  total += w.aberturas.length * 2;
+  // +1 por abertura (montante de reforço)
+  total += w.aberturas.length;
   return total;
 }
 
-// --- Guias extras por abertura (segundo brief)
+// --- Guias extras por abertura
+// porta/vão: ⌈largura / 3⌉  (apenas verga)
+// janela:    ⌈(largura × 2) / 3⌉  (verga + peitoril)
 export function guiasExtraAberturas(w: WallItem): number {
   return w.aberturas.reduce((acc, a) => {
-    const guia_extra = safe(a.largura) * 2;
-    const base = Math.ceil(guia_extra / 3);
-    return acc + base + 1;
+    const largura = safe(a.largura);
+    if (largura <= 0) return acc;
+    const tipo: OpeningTipo = a.tipo ?? "porta";
+    const metros = tipo === "janela" ? largura * 2 : largura;
+    return acc + Math.ceil(metros / 3);
   }, 0);
 }
 
@@ -267,5 +272,30 @@ export function placaPrecoFor(
     case "PERF_ST": return s.placa_preco_perf_st;
     case "PERF_RU": return s.placa_preco_perf_ru;
     default: return s.placa_preco_st;
+  }
+}
+
+// Preço de montante/guia de acordo com o perfil ativo (48/70/90 mm).
+export function montantePrecoFor(
+  perfil_mm: number,
+  s: { preco_montante_48: number; preco_montante_70: number; preco_montante_90: number }
+): number {
+  switch (Number(perfil_mm)) {
+    case 48: return Number(s.preco_montante_48);
+    case 90: return Number(s.preco_montante_90);
+    case 70:
+    default: return Number(s.preco_montante_70);
+  }
+}
+
+export function guiaPrecoFor(
+  perfil_mm: number,
+  s: { preco_guia_48: number; preco_guia_70: number; preco_guia_90: number }
+): number {
+  switch (Number(perfil_mm)) {
+    case 48: return Number(s.preco_guia_48);
+    case 90: return Number(s.preco_guia_90);
+    case 70:
+    default: return Number(s.preco_guia_70);
   }
 }

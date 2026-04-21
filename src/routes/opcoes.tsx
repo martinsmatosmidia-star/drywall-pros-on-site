@@ -1,12 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-import { Upload, LogOut } from "lucide-react";
-import { toast } from "sonner";
+import { createFileRoute } from "@tanstack/react-router";
 import { AuthGuard } from "@/components/AuthGuard";
 import { NumInput } from "@/components/NumInput";
-import { useCalcSettings, useCompanySettings } from "@/hooks/useSettings";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useCalcSettings } from "@/hooks/useSettings";
 
 export const Route = createFileRoute("/opcoes")({
   component: () => (<AuthGuard><Opcoes /></AuthGuard>),
@@ -32,111 +27,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function Opcoes() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const { settings, update: updateCalc } = useCalcSettings();
-  const { company, update: updateCompany, reload: reloadCompany } = useCompanySettings();
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
 
-  if (!settings || !company) {
+  if (!settings) {
     return <div className="px-4 pt-10 text-center text-muted-foreground">Carregando...</div>;
   }
 
-  const uploadLogo = async (f: File) => {
-    if (!user) return;
-    setUploading(true);
-    const ext = f.name.split(".").pop() || "png";
-    const path = `${user.id}/logo.${ext}`;
-    const { error } = await supabase.storage.from("logos").upload(path, f, { upsert: true });
-    if (error) {
-      toast.error("Erro ao subir logo: " + error.message);
-      setUploading(false);
-      return;
-    }
-    const { data: signed } = await supabase.storage.from("logos").createSignedUrl(path, 60 * 60 * 24 * 365);
-    if (signed?.signedUrl) {
-      await updateCompany({ logo_url: signed.signedUrl });
-      reloadCompany();
-      toast.success("Logo atualizada");
-    }
-    setUploading(false);
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/login" });
-  };
+  const perfilAtivo = Number(settings.perfil_mm);
 
   return (
     <div className="space-y-4 px-4 pt-6">
       <h1 className="text-2xl font-black text-foreground">Opções</h1>
-
-      {/* Empresa */}
-      <Section title="Dados da empresa">
-        <Field label="Nome da empresa">
-          <input
-            type="text"
-            value={company.name}
-            onChange={(e) => updateCompany({ name: e.target.value })}
-            maxLength={100}
-            className="h-12 w-full rounded-xl border-2 border-border bg-surface px-3 text-foreground focus:border-primary focus:outline-none"
-          />
-        </Field>
-        <div className="grid grid-cols-2 gap-2">
-          <Field label="Telefone">
-            <input
-              type="tel"
-              value={company.phone}
-              onChange={(e) => updateCompany({ phone: e.target.value })}
-              maxLength={30}
-              className="h-12 w-full rounded-xl border-2 border-border bg-surface px-3 text-foreground focus:border-primary focus:outline-none"
-            />
-          </Field>
-          <Field label="Email">
-            <input
-              type="email"
-              value={company.email}
-              onChange={(e) => updateCompany({ email: e.target.value })}
-              maxLength={100}
-              className="h-12 w-full rounded-xl border-2 border-border bg-surface px-3 text-foreground focus:border-primary focus:outline-none"
-            />
-          </Field>
-        </div>
-        <Field label="Observações para o orçamento">
-          <textarea
-            value={company.notes}
-            onChange={(e) => updateCompany({ notes: e.target.value })}
-            rows={3}
-            maxLength={500}
-            className="w-full rounded-xl border-2 border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-          />
-        </Field>
-        <Field label="Logo (PNG/JPG)">
-          <div className="flex items-center gap-3">
-            {company.logo_url && (
-              <img src={company.logo_url} alt="Logo" className="h-16 w-16 rounded-lg border border-border bg-white object-contain" />
-            )}
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="touch-target flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface px-3 text-sm font-semibold text-foreground"
-              disabled={uploading}
-            >
-              <Upload className="h-4 w-4" /> {uploading ? "Subindo..." : "Enviar logo"}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadLogo(f);
-              }}
-            />
-          </div>
-        </Field>
-      </Section>
 
       {/* Perfil */}
       <Section title="Perfil (montante/guia)">
@@ -146,7 +47,7 @@ function Opcoes() {
               key={mm}
               onClick={() => updateCalc({ perfil_mm: mm })}
               className={`touch-target rounded-xl border-2 font-bold ${
-                Number(settings.perfil_mm) === mm
+                perfilAtivo === mm
                   ? "border-primary bg-primary/15 text-primary"
                   : "border-border bg-surface text-foreground"
               }`}
@@ -230,11 +131,44 @@ function Opcoes() {
         </div>
       </Section>
 
-      {/* Preços */}
+      {/* Preços de perfis por tamanho */}
+      <Section title="Preços de perfis (R$ / barra)">
+        <p className="text-[11px] text-muted-foreground">
+          O preço usado nos cálculos segue o perfil ativo ({perfilAtivo} mm).
+        </p>
+        <div className="space-y-2">
+          <div className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Montante</div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { mm: 48, key: "preco_montante_48" as const },
+              { mm: 70, key: "preco_montante_70" as const },
+              { mm: 90, key: "preco_montante_90" as const },
+            ].map(({ mm, key }) => (
+              <div key={key} className={`rounded-xl border-2 p-2 ${perfilAtivo === mm ? "border-primary bg-primary/10" : "border-border bg-surface"}`}>
+                <div className="mb-1 text-[10px] font-bold uppercase text-muted-foreground">{mm} mm</div>
+                <NumInput value={Number(settings[key])} onChange={(n) => updateCalc({ [key]: n } as never)} suffix="R$" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Guia</div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { mm: 48, key: "preco_guia_48" as const },
+              { mm: 70, key: "preco_guia_70" as const },
+              { mm: 90, key: "preco_guia_90" as const },
+            ].map(({ mm, key }) => (
+              <div key={key} className={`rounded-xl border-2 p-2 ${perfilAtivo === mm ? "border-primary bg-primary/10" : "border-border bg-surface"}`}>
+                <div className="mb-1 text-[10px] font-bold uppercase text-muted-foreground">{mm} mm</div>
+                <NumInput value={Number(settings[key])} onChange={(n) => updateCalc({ [key]: n } as never)} suffix="R$" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Preços demais materiais */}
       <Section title="Preços de materiais (R$)">
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Montante"><NumInput value={Number(settings.preco_montante)} onChange={(n) => updateCalc({ preco_montante: n })} suffix="R$" /></Field>
-          <Field label="Guia"><NumInput value={Number(settings.preco_guia)} onChange={(n) => updateCalc({ preco_guia: n })} suffix="R$" /></Field>
           <Field label="Parafuso (un)"><NumInput value={Number(settings.preco_parafuso)} onChange={(n) => updateCalc({ preco_parafuso: n })} suffix="R$" /></Field>
           <Field label="Bucha"><NumInput value={Number(settings.preco_bucha)} onChange={(n) => updateCalc({ preco_bucha: n })} suffix="R$" /></Field>
           <Field label="Massa (balde)"><NumInput value={Number(settings.preco_massa)} onChange={(n) => updateCalc({ preco_massa: n })} suffix="R$" /></Field>
@@ -257,13 +191,6 @@ function Opcoes() {
           <NumInput value={Number(settings.margem_pct)} onChange={(n) => updateCalc({ margem_pct: n })} suffix="%" max={500} />
         </Field>
       </Section>
-
-      <button
-        onClick={logout}
-        className="touch-target flex w-full items-center justify-center gap-2 rounded-xl border-2 border-destructive/30 bg-destructive/10 text-sm font-bold text-destructive"
-      >
-        <LogOut className="h-4 w-4" /> Sair
-      </button>
     </div>
   );
 }
