@@ -1,0 +1,7 @@
+ALTER TABLE public.calc_settings
+  ADD COLUMN IF NOT EXISTS preco_montante_48 numeric NOT NULL DEFAULT 18,
+  ADD COLUMN IF NOT EXISTS preco_montante_70 numeric NOT NULL DEFAULT 25,
+  ADD COLUMN IF NOT EXISTS preco_montante_90 numeric NOT NULL DEFAULT 32,
+  ADD COLUMN IF NOT EXISTS preco_guia_48 numeric NOT NULL DEFAULT 16,
+  ADD COLUMN IF NOT EXISTS preco_guia_70 numeric NOT NULL DEFAULT 22,
+  ADD COLUMN IF NOT EXISTS preco_guia_90 numeric NOT NULL DEFAULT 28;
