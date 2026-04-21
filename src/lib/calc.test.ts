@@ -25,7 +25,7 @@ describe("Cálculos de parede", () => {
       tipo: "parede" as const,
       comprimento: 5,
       altura: 3,
-      aberturas: [{ largura: 1, altura: 2 }],
+      aberturas: [{ largura: 1, altura: 2, tipo: "porta" as const }],
     };
     expect(wallAreaLiquida(w)).toBe(13); // 15 - 2
   });
@@ -36,7 +36,7 @@ describe("Cálculos de parede", () => {
       tipo: "parede" as const,
       comprimento: 1,
       altura: 1,
-      aberturas: [{ largura: 5, altura: 5 }],
+      aberturas: [{ largura: 5, altura: 5, tipo: "porta" as const }],
     };
     expect(wallAreaLiquida(w)).toBe(0);
   });
@@ -53,27 +53,90 @@ describe("Cálculos de parede", () => {
     expect(montantesParede(w, 0.6)).toBe(16);
   });
 
-  it("montantes adiciona +2 por abertura", () => {
+  it("montantes adiciona +1 por abertura", () => {
     const w = {
       id: "1",
       tipo: "parede" as const,
       comprimento: 6,
       altura: 3,
-      aberturas: [{ largura: 1, altura: 2 }, { largura: 0.8, altura: 2.1 }],
+      aberturas: [
+        { largura: 1, altura: 2, tipo: "porta" as const },
+        { largura: 0.8, altura: 2.1, tipo: "janela" as const },
+      ],
     };
-    expect(montantesParede(w, 0.6)).toBe(11 + 4);
+    // base = 11, +2 (uma por abertura)
+    expect(montantesParede(w, 0.6)).toBe(13);
   });
+});
 
-  it("guias extras por abertura: largura×2 ÷3 ceil + 1", () => {
+describe("Guias extras por abertura", () => {
+  it("porta 0,9 m: ⌈0,9/3⌉ = 1 guia", () => {
     const w = {
       id: "1",
       tipo: "parede" as const,
       comprimento: 5,
       altura: 3,
-      aberturas: [{ largura: 1.2, altura: 2.1 }],
+      aberturas: [{ largura: 0.9, altura: 2.1, tipo: "porta" as const }],
     };
-    // 1.2*2=2.4 → ceil(2.4/3)=1 → +1 = 2
+    expect(guiasExtraAberturas(w)).toBe(1);
+  });
+
+  it("vão 2 m: ⌈2/3⌉ = 1 guia", () => {
+    const w = {
+      id: "1",
+      tipo: "parede" as const,
+      comprimento: 5,
+      altura: 3,
+      aberturas: [{ largura: 2, altura: 2.1, tipo: "vao" as const }],
+    };
+    expect(guiasExtraAberturas(w)).toBe(1);
+  });
+
+  it("janela 1,5 m: verga + peitoril = 3 m → 1 guia", () => {
+    const w = {
+      id: "1",
+      tipo: "parede" as const,
+      comprimento: 5,
+      altura: 3,
+      aberturas: [{ largura: 1.5, altura: 1.2, tipo: "janela" as const }],
+    };
+    expect(guiasExtraAberturas(w)).toBe(1);
+  });
+
+  it("janela 4 m: ⌈8/3⌉ = 3 guias", () => {
+    const w = {
+      id: "1",
+      tipo: "parede" as const,
+      comprimento: 6,
+      altura: 3,
+      aberturas: [{ largura: 4, altura: 1.2, tipo: "janela" as const }],
+    };
+    expect(guiasExtraAberturas(w)).toBe(3);
+  });
+
+  it("2 portas pequenas: 1 + 1 = 2 guias", () => {
+    const w = {
+      id: "1",
+      tipo: "parede" as const,
+      comprimento: 6,
+      altura: 3,
+      aberturas: [
+        { largura: 0.8, altura: 2.1, tipo: "porta" as const },
+        { largura: 0.9, altura: 2.1, tipo: "porta" as const },
+      ],
+    };
     expect(guiasExtraAberturas(w)).toBe(2);
+  });
+
+  it("abertura sem tipo é tratada como porta", () => {
+    const w = {
+      id: "1",
+      tipo: "parede" as const,
+      comprimento: 5,
+      altura: 3,
+      aberturas: [{ largura: 0.9, altura: 2.1 }],
+    };
+    expect(guiasExtraAberturas(w)).toBe(1);
   });
 });
 
@@ -113,7 +176,7 @@ describe("Totais agregados", () => {
       tipo: "parede",
       comprimento: 4,
       altura: 3,
-      aberturas: [{ largura: 0.9, altura: 2.1 }],
+      aberturas: [{ largura: 0.9, altura: 2.1, tipo: "porta" }],
     },
     { id: "c1", tipo: "contraparede", comprimento: 3, altura: 3, aberturas: [] },
     {
