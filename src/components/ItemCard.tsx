@@ -109,32 +109,73 @@ function WallEditor({
 }
 
 function OpeningsList({ item, onUpdate }: { item: WallItem; onUpdate: (a: Opening[]) => void }) {
-  const add = () => onUpdate([...item.aberturas, { largura: 0.8, altura: 2.1 }]);
+  const defaults: Record<NonNullable<Opening["tipo"]>, { largura: number; altura: number }> = {
+    porta: { largura: 0.8, altura: 2.1 },
+    janela: { largura: 1.5, altura: 1.2 },
+    vao: { largura: 0.9, altura: 2.1 },
+  };
+  const add = () => onUpdate([...item.aberturas, { ...defaults.porta, tipo: "porta" }]);
   const update = (i: number, patch: Partial<Opening>) =>
     onUpdate(item.aberturas.map((a, idx) => (idx === i ? { ...a, ...patch } : a)));
   const remove = (i: number) => onUpdate(item.aberturas.filter((_, idx) => idx !== i));
+  const setTipo = (i: number, tipo: NonNullable<Opening["tipo"]>) => {
+    const current = item.aberturas[i];
+    const isDefaultSize =
+      !current.largura ||
+      !current.altura ||
+      Object.values(defaults).some(
+        (d) => d.largura === current.largura && d.altura === current.altura
+      );
+    update(i, { tipo, ...(isDefaultSize ? defaults[tipo] : {}) });
+  };
 
   const areaTotal = wallAreaBruta(item);
   const areaAb = wallAreaAberturas(item);
   const overflow = areaAb > areaTotal && areaTotal > 0;
 
+  const tipoLabels: Array<{ v: NonNullable<Opening["tipo"]>; l: string }> = [
+    { v: "porta", l: "Porta" },
+    { v: "janela", l: "Janela" },
+    { v: "vao", l: "Vão" },
+  ];
+
   return (
-    <div className="space-y-2 rounded-lg bg-surface/50 p-3">
-      {item.aberturas.map((a, i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
-          <div>
-            <label className="text-[10px] font-medium uppercase text-muted-foreground">Largura</label>
-            <NumInput value={a.largura || ""} onChange={(n) => update(i, { largura: n })} max={10} />
+    <div className="space-y-3 rounded-lg bg-surface/50 p-3">
+      {item.aberturas.map((a, i) => {
+        const tipoAtual: NonNullable<Opening["tipo"]> = a.tipo ?? "porta";
+        return (
+          <div key={i} className="space-y-2 rounded-lg border border-border/50 bg-card/50 p-2">
+            <div className="grid grid-cols-3 gap-1">
+              {tipoLabels.map((t) => (
+                <button
+                  key={t.v}
+                  onClick={() => setTipo(i, t.v)}
+                  className={`rounded-md px-2 py-1.5 text-[11px] font-bold uppercase transition-colors ${
+                    tipoAtual === t.v
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-surface text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.l}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+              <div>
+                <label className="text-[10px] font-medium uppercase text-muted-foreground">Largura</label>
+                <NumInput value={a.largura || ""} onChange={(n) => update(i, { largura: n })} max={10} />
+              </div>
+              <div>
+                <label className="text-[10px] font-medium uppercase text-muted-foreground">Altura</label>
+                <NumInput value={a.altura || ""} onChange={(n) => update(i, { altura: n })} max={10} />
+              </div>
+              <button onClick={() => remove(i)} className="h-14 rounded-lg bg-destructive/10 px-3 text-destructive">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="text-[10px] font-medium uppercase text-muted-foreground">Altura</label>
-            <NumInput value={a.altura || ""} onChange={(n) => update(i, { altura: n })} max={10} />
-          </div>
-          <button onClick={() => remove(i)} className="h-14 rounded-lg bg-destructive/10 px-3 text-destructive">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      ))}
+        );
+      })}
       {overflow && (
         <div className="rounded-lg bg-destructive/15 px-3 py-2 text-xs font-medium text-destructive">
           ⚠ Aberturas maiores que a parede
