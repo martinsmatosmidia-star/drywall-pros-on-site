@@ -153,14 +153,16 @@ function Orcamento() {
       toast.error("Adicione itens antes de salvar");
       return;
     }
-    const { error } = await supabase.from("quotes").insert({
+    const payload = {
       user_id: user.id,
       cliente: draft.cliente,
       obra: draft.obra,
       total: valorFinal,
       settings_snapshot: { ...settings, margem_pct: margemPct },
       items_snapshot: draft.items as unknown as object,
-    });
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("quotes") as any).insert(payload);
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
       return;
