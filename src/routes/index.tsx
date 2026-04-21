@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Plus, FilePlus2 } from "lucide-react";
+import { toast } from "sonner";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Logo } from "@/components/Logo";
 import { NumInput } from "@/components/NumInput";
@@ -55,10 +56,25 @@ function Home() {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(20);
   };
 
+  const hasContent = draft.items.length > 0 || !!draft.cliente || !!draft.obra;
+  const novoOrcamento = () => {
+    if (hasContent && !confirm("Limpar o rascunho atual e iniciar um novo orçamento?")) return;
+    draft.reset();
+    toast.success("Novo orçamento iniciado");
+  };
+
   return (
     <div className="px-4 pt-6">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between gap-2">
         <Logo size={40} />
+        {hasContent && (
+          <button
+            onClick={novoOrcamento}
+            className="flex items-center gap-1 rounded-lg bg-primary/15 px-3 py-2 text-sm font-semibold text-primary"
+          >
+            <FilePlus2 className="h-4 w-4" /> Novo
+          </button>
+        )}
       </div>
 
       {/* Cliente / Obra */}
