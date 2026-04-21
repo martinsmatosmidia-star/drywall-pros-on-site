@@ -14,7 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calc_settings: {
+        Row: {
+          created_at: string
+          espacamento: number
+          fita_tipo: string
+          margem_pct: number
+          massa_m2_balde: number
+          mo_contraparede: number
+          mo_forro: number
+          mo_parede: number
+          parafusos_por_placa: number
+          perda_pct: number
+          perfil_mm: number
+          placa_preco_perf_ru: number
+          placa_preco_perf_st: number
+          placa_preco_rf: number
+          placa_preco_ru: number
+          placa_preco_st: number
+          placa_tipo: string
+          preco_arame: number
+          preco_bucha: number
+          preco_f530: number
+          preco_fita: number
+          preco_guia: number
+          preco_massa: number
+          preco_montante: number
+          preco_parafuso: number
+          preco_regulador: number
+          preco_tabica: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          espacamento?: number
+          fita_tipo?: string
+          margem_pct?: number
+          massa_m2_balde?: number
+          mo_contraparede?: number
+          mo_forro?: number
+          mo_parede?: number
+          parafusos_por_placa?: number
+          perda_pct?: number
+          perfil_mm?: number
+          placa_preco_perf_ru?: number
+          placa_preco_perf_st?: number
+          placa_preco_rf?: number
+          placa_preco_ru?: number
+          placa_preco_st?: number
+          placa_tipo?: string
+          preco_arame?: number
+          preco_bucha?: number
+          preco_f530?: number
+          preco_fita?: number
+          preco_guia?: number
+          preco_massa?: number
+          preco_montante?: number
+          preco_parafuso?: number
+          preco_regulador?: number
+          preco_tabica?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          espacamento?: number
+          fita_tipo?: string
+          margem_pct?: number
+          massa_m2_balde?: number
+          mo_contraparede?: number
+          mo_forro?: number
+          mo_parede?: number
+          parafusos_por_placa?: number
+          perda_pct?: number
+          perfil_mm?: number
+          placa_preco_perf_ru?: number
+          placa_preco_perf_st?: number
+          placa_preco_rf?: number
+          placa_preco_ru?: number
+          placa_preco_st?: number
+          placa_tipo?: string
+          preco_arame?: number
+          preco_bucha?: number
+          preco_f530?: number
+          preco_fita?: number
+          preco_guia?: number
+          preco_massa?: number
+          preco_montante?: number
+          preco_parafuso?: number
+          preco_regulador?: number
+          preco_tabica?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      company_settings: {
+        Row: {
+          created_at: string
+          email: string
+          logo_url: string | null
+          name: string
+          notes: string
+          phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          logo_url?: string | null
+          name?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          logo_url?: string | null
+          name?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          id: string
+          name?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quotes: {
+        Row: {
+          cliente: string
+          created_at: string
+          id: string
+          items_snapshot: Json
+          obra: string
+          settings_snapshot: Json
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cliente?: string
+          created_at?: string
+          id?: string
+          items_snapshot?: Json
+          obra?: string
+          settings_snapshot?: Json
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          id?: string
+          items_snapshot?: Json
+          obra?: string
+          settings_snapshot?: Json
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
