@@ -19,6 +19,7 @@ export type WallItem = {
   comprimento: number;
   altura: number;
   aberturas: Opening[];
+  faces?: 1 | 2 | 4;
 };
 export type CeilingAcabamento = "tabica" | "cantoneira";
 export type CeilingItem = {
@@ -155,8 +156,17 @@ export function computeTotals(items: Item[], p: CalcParams): Totals {
     contras.reduce((a, w) => a + safe(w.comprimento), 0);
 
   // Placas
-  const placas_parede = Math.ceil((area_parede * 2) / PLACA_AREA);
-  const placas_contraparede = Math.ceil(area_contraparede / PLACA_AREA);
+  const placas_parede = walls.reduce((acc, w) => {
+    const area = wallAreaLiquida(w);
+    const faces = w.faces ?? 2;
+    return acc + Math.ceil((area * faces) / PLACA_AREA);
+  }, 0);
+
+  const placas_contraparede = contras.reduce((acc, w) => {
+    const area = wallAreaLiquida(w);
+    const faces = w.faces ?? 1;
+    return acc + Math.ceil((area * faces) / PLACA_AREA);
+  }, 0);
   const placas_forro = Math.ceil(area_forro / PLACA_AREA);
   const placas_total = placas_parede + placas_contraparede + placas_forro;
   const perda = Math.max(0, p.perda_pct) / 100;
@@ -184,12 +194,12 @@ export function computeTotals(items: Item[], p: CalcParams): Totals {
   // Massa
   const massa_baldes = Math.ceil(area_total / (p.massa_m2_balde || MASSA_M2_BALDE_DEFAULT));
 
-  // Fita exclusiva
-  const necessidade = area_total;
+  // Fita exclusiva (1,5 m por placa)
+  const fita_metros = placas_final * 1.5;
   const fita_rolos =
     p.fita_tipo === "tela"
-      ? Math.ceil(necessidade / FITA_TELA_M)
-      : Math.ceil(necessidade / FITA_PAPEL_M);
+      ? Math.ceil(fita_metros / FITA_TELA_M)
+      : Math.ceil(fita_metros / FITA_PAPEL_M);
 
   // Forro
   const forro_tabica = ceilings.reduce((a, c) => a + forroTabica(c), 0);

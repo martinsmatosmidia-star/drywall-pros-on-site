@@ -90,6 +90,25 @@ function WallEditor({
         </div>
       </div>
 
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Faces de placa</label>
+        <div className="grid grid-cols-3 gap-2">
+          {([1, 2, 4] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => onUpdate({ faces: f } as Partial<Item>)}
+              className={`rounded-xl border-2 py-2 text-sm font-bold transition-colors ${
+                (item.faces ?? 2) === f
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-surface text-foreground"
+              }`}
+            >
+              {f === 1 ? "1 face" : f === 2 ? "2 faces" : "Dupla"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         onClick={() => setOpeningsOpen(!openingsOpen)}
         className="flex w-full items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground"

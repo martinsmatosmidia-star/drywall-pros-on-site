@@ -14,6 +14,7 @@ type QuoteData = {
   obra: string;
   totals: Totals;
   valorFinal: number;
+  lines: Array<{ nome: string; quantidade: number; unidade: string; total: number }>;
 };
 
 const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -114,7 +115,45 @@ export async function generateQuotePDF(company: CompanyInfo, quote: QuoteData): 
     y += 6;
   }
 
-  y += 10;
+  // Tabela de materiais
+  y += 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(20, 20, 20);
+  doc.text("Materiais inclusos", margin, y);
+  y += 7;
+
+  const colNome = margin;
+  const colQtd = 130;
+  const colTotal = pageW - margin;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(100, 100, 100);
+  doc.text("Material", colNome, y);
+  doc.text("Qtd", colQtd, y);
+  doc.text("Total", colTotal, y, { align: "right" });
+  y += 5;
+
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margin, y, pageW - margin, y);
+  y += 4;
+
+  quote.lines.forEach((l, i) => {
+    if (i % 2 === 0) {
+      doc.setFillColor(248, 248, 248);
+      doc.rect(margin - 1, y - 3, pageW - margin * 2 + 2, 7, "F");
+    }
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(40, 40, 40);
+    doc.text(l.nome, colNome, y);
+    doc.text(`${l.quantidade} ${l.unidade}`, colQtd, y);
+    doc.text(brl(l.total), colTotal, y, { align: "right" });
+    y += 7;
+  });
+
+  y += 6;
 
   // Valor total
   doc.setFillColor(245, 158, 11); // laranja
