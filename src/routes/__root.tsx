@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Home, Package, FileText, Settings, SlidersHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Onboarding } from "@/components/Onboarding";
 
 import appCss from "../styles.css?url";
 
