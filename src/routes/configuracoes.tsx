@@ -182,6 +182,21 @@ function Configuracoes() {
       >
         <LogOut className="h-4 w-4" /> Sair
       </button>
+
+      <div className="rounded-2xl border-2 border-success/30 bg-success/5 p-4">
+        <h3 className="text-sm font-black uppercase tracking-wide text-success">Precisa de ajuda?</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Fale com nosso suporte direto pelo WhatsApp. Respondemos em minutos.
+        </p>
+        <a
+          href="https://wa.me/5548991461241?text=Olá,%20preciso%20de%20ajuda%20com%20o%20Drywall%20Pro"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-success px-4 py-3 text-sm font-bold text-success-foreground"
+        >
+          💬 Falar no WhatsApp
+        </a>
+      </div>
     </div>
   );
 }
