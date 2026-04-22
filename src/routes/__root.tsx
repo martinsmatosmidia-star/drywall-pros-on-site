@@ -1,5 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Home, Package, FileText, Settings, SlidersHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Onboarding } from "@/components/Onboarding";
 
 import appCss from "../styles.css?url";
 
@@ -70,8 +72,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    const done = localStorage.getItem("onboarding_done");
+    if (!done) setShowOnboarding(true);
+  }, []);
+
+  const finishOnboarding = () => {
+    localStorage.setItem("onboarding_done", "true");
+    setShowOnboarding(false);
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      {showOnboarding && <Onboarding onFinish={finishOnboarding} />}
       <main className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </main>
