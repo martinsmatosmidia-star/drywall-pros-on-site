@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Home, Package, FileText, Settings, SlidersHorizontal } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -69,5 +70,30 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <main className="flex-1 overflow-y-auto pb-24">
+        <Outlet />
+      </main>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-md items-center justify-around px-2 py-2">
+          <Link to="/" className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-semibold text-muted-foreground [&.active]:text-primary">
+            <Home className="h-5 w-5" /> Início
+          </Link>
+          <Link to="/materiais" className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-semibold text-muted-foreground [&.active]:text-primary">
+            <Package className="h-5 w-5" /> Materiais
+          </Link>
+          <Link to="/orcamento" className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-semibold text-muted-foreground [&.active]:text-primary">
+            <FileText className="h-5 w-5" /> Orçamento
+          </Link>
+          <Link to="/opcoes" className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-semibold text-muted-foreground [&.active]:text-primary">
+            <SlidersHorizontal className="h-5 w-5" /> Opções
+          </Link>
+          <Link to="/configuracoes" className="flex flex-col items-center gap-1 px-3 py-2 text-xs font-semibold text-muted-foreground [&.active]:text-primary">
+            <Settings className="h-5 w-5" /> Config
+          </Link>
+        </div>
+      </nav>
+    </div>
+  );
 }

@@ -103,6 +103,7 @@ function Orcamento() {
       obra: draft.obra,
       totals,
       valorFinal,
+      lines,
     });
     const filename = pdfFileName(draft.cliente);
     const file = new File([blob], filename, { type: "application/pdf" });
