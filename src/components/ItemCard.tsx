@@ -28,7 +28,7 @@ export function ItemCard({
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-elevated">
       <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
           <span className={`rounded-md px-2 py-1 text-[11px] font-bold uppercase ${tipoColor}`}>
             {tipoBadge}
           </span>
@@ -42,11 +42,30 @@ export function ItemCard({
               {fmt(ceilingArea(item as CeilingItem))} m²
             </span>
           )}
+          {item.label && (
+            <span className="text-xs font-medium text-muted-foreground">
+              {item.label}
+            </span>
+          )}
         </div>
-        <button onClick={onRemove} className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">
+        <button
+          onClick={() => {
+            if (confirm("Remover este item do orçamento?")) onRemove();
+          }}
+          className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+        >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
+
+      <input
+        type="text"
+        placeholder="Ex: Sala, Quarto 1..."
+        value={item.label || ""}
+        onChange={(e) => onUpdate({ label: e.target.value } as Partial<Item>)}
+        className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        maxLength={40}
+      />
 
       {item.tipo !== "forro" ? (
         <WallEditor item={item as WallItem} onUpdate={onUpdate} openingsOpen={openingsOpen} setOpeningsOpen={setOpeningsOpen} />

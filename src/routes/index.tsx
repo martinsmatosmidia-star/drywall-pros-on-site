@@ -139,6 +139,33 @@ function Home() {
         </div>
       </div>
 
+      {/* Resumo */}
+      {draft.items.length > 0 && (() => {
+        const paredes = draft.items.filter((i) => i.tipo === "parede").length;
+        const contras = draft.items.filter((i) => i.tipo === "contraparede").length;
+        const forros = draft.items.filter((i) => i.tipo === "forro").length;
+        const totalM2 = draft.items.reduce((acc, i) => {
+          if (i.tipo === "forro") return acc + (i.comprimento || 0) * (i.largura || 0);
+          const ab = (i.aberturas || []).reduce((a, o) => a + (o.largura || 0) * (o.altura || 0), 0);
+          return acc + Math.max(0, (i.comprimento || 0) * (i.altura || 0) - ab);
+        }, 0);
+        return (
+          <div className="mb-4 rounded-2xl bg-surface px-4 py-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-semibold text-foreground">
+                {draft.items.length} {draft.items.length === 1 ? "item" : "itens"}
+              </span>
+              <span className="font-bold text-primary">{totalM2.toFixed(1)} m² total</span>
+            </div>
+            <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
+              {paredes > 0 && <span>{paredes} parede{paredes > 1 ? "s" : ""}</span>}
+              {contras > 0 && <span>{contras} contraparede{contras > 1 ? "s" : ""}</span>}
+              {forros > 0 && <span>{forros} forro{forros > 1 ? "s" : ""}</span>}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Lista de itens */}
       <div className="space-y-3">
         {draft.items.length === 0 && (

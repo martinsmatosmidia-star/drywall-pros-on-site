@@ -20,6 +20,7 @@ export type WallItem = {
   altura: number;
   aberturas: Opening[];
   faces?: 1 | 2 | 4;
+  label?: string;
 };
 export type CeilingAcabamento = "tabica" | "cantoneira";
 export type CeilingItem = {
@@ -30,6 +31,7 @@ export type CeilingItem = {
   altura_laje: number;
   altura_forro: number;
   acabamento?: CeilingAcabamento;
+  label?: string;
 };
 export type Item = WallItem | CeilingItem;
 
