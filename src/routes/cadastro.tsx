@@ -31,8 +31,8 @@ function CadastroPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
+    const { data, error } = await supabase.auth.signUp({
+      email: result.data.email,
       password,
       options: {
         emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
@@ -48,6 +48,14 @@ function CadastroPage() {
       } else {
         toast.error("Erro ao criar conta: " + error.message);
       }
+      return;
+    }
+    if (!data.session) {
+      // Confirmação de email ativa: sem sessão até o usuário clicar no link.
+      toast.success("Conta criada! Abra o link que enviamos para seu email antes de entrar.", {
+        duration: 10000,
+      });
+      navigate({ to: "/login" });
       return;
     }
     toast.success("Conta criada!");
